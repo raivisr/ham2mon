@@ -5,7 +5,6 @@ Created on Fri Jul  3 13:38:36 2015
 
 @author: madengr
 """
-import __builtin__
 import receiver as recvr
 import estimate
 import parser as prsr
@@ -214,7 +213,7 @@ class Scanner(object):
             with open(self.lockout_file_name) as lockout_file:
                 lines = lockout_file.read().splitlines()
                 lockout_file.close()
-                lines = __builtin__.filter(None, lines)
+                lines = filter(None, lines)
             # Convert to baseband frequencies, round, and append
             for freq in lines:
                 bb_freq = float(freq) - self.center_freq
@@ -244,7 +243,7 @@ class Scanner(object):
             with open(self.priority_file_name) as priority_file:
                 lines = priority_file.read().splitlines()
                 priority_file.close()
-                lines = __builtin__.filter(None, lines)
+                lines = filter(None, lines)
             # Convert to baseband frequencies, round, and append if within BW
             for freq in lines:
                 bb_freq = float(freq) - self.center_freq
@@ -348,7 +347,7 @@ def main():
 
     if len(parser.parser_args) != 0:
         parser.print_help() #pylint: disable=maybe-no-member
-        raise SystemExit, 1
+        raise SystemExit(1)
 
     # Create scanner object
     ask_samp_rate = parser.ask_samp_rate
@@ -369,14 +368,13 @@ def main():
     scanner.set_gain(parser.gain_db)
     scanner.set_if_gain(parser.if_gain_db)
     scanner.set_bb_gain(parser.bb_gain_db)
-    print "\n"
-    print "Started %s at %.3f Msps" % (hw_args, scanner.samp_rate/1E6)
-    print "RX at %.3f MHz with %d dB gain" % (scanner.center_freq/1E6,
-                                              scanner.gain_db)
+    print("\nStarted %s at %.3f Msps" % (hw_args, scanner.samp_rate/1E6))
+    print("RX at %.3f MHz with %d dB gain" % (scanner.center_freq/1E6,
+                                              scanner.gain_db))
     scanner.set_squelch(parser.squelch_db)
     scanner.set_volume(parser.volume_db)
-    print "%d demods of type %d at %d dB squelch and %d dB volume" % \
-        (num_demod, type_demod, scanner.squelch_db, scanner.volume_db)
+    print("%d demods of type %d at %d dB squelch and %d dB volume" % \
+        (num_demod, type_demod, scanner.squelch_db, scanner.volume_db))
 
     # Create this epmty list to allow printing to screen
     old_gui_tuned_channels = []

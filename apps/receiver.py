@@ -150,8 +150,8 @@ class TunerDemodNBFM(BaseTuner):
 
         # Low pass filter taps for decimation by 5
         low_pass_filter_taps_0 = \
-            grfilter.firdes_low_pass(1, 1, 0.090, 0.010,
-                                     grfilter.firdes.WIN_HAMMING)
+            grfilter.firdes.low_pass(1, 1, 0.090, 0.010,
+                                     window.WIN_HAMMING)
 
         # Frequency translating FIR filter decimating by 5
         self.freq_xlating_fir_filter_ccc = \
@@ -166,8 +166,8 @@ class TunerDemodNBFM(BaseTuner):
         # Low pass filter taps for decimation from samp_rate/25 to 40-79.9 ksps
         # In other words, decimation by int(samp_rate/1E6)
         # 12.5 kHz cutoff for NBFM channel bandwidth
-        low_pass_filter_taps_1 = grfilter.firdes_low_pass(
-            1, samp_rate/decims[0]**2, 12.5E3, 1E3, grfilter.firdes.WIN_HAMMING)
+        low_pass_filter_taps_1 = grfilter.firdes.low_pass(
+            1, samp_rate/decims[0]**2, 12.5E3, 1E3, window.WIN_HAMMING)
 
         # FIR filter decimation by int(samp_rate/1E6)
         fir_filter_ccc_1 = grfilter.fir_filter_ccc(decims[1],
@@ -183,9 +183,9 @@ class TunerDemodNBFM(BaseTuner):
             analog.quadrature_demod_cf(self.quad_demod_gain)
 
         # 3.5 kHz cutoff for audio bandwidth
-        low_pass_filter_taps_2 = grfilter.firdes_low_pass(1,\
+        low_pass_filter_taps_2 = grfilter.firdes.low_pass(1,\
                         samp_rate/(decims[1] * decims[0]**2),\
-                        3.5E3, 500, grfilter.firdes.WIN_HAMMING)
+                        3.5E3, 500, window.WIN_HAMMING)
 
         # FIR filter decimating by 5 from 40-79.9 ksps to 8-15.98 ksps
         fir_filter_fff_0 = grfilter.fir_filter_fff(decims[0],
@@ -213,8 +213,7 @@ class TunerDemodNBFM(BaseTuner):
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
         # File sink with single channel and bits/sample
-        self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, audio_bps)
+        self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1, audio_rate, blocks.FORMAT_WAV, blocks.FORMAT_PCM_16, False)
 
         # Connect the blocks for recording
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
@@ -601,14 +600,13 @@ def main():
     center_freq = 144.5E6
     receiver.set_center_freq(center_freq)
     receiver.set_gain(10)
-    print "\n"
-    print "Started %s at %.3f Msps" % (hw_args, receiver.samp_rate/1E6)
-    print "RX at %.3f MHz with %d dB gain" % (receiver.center_freq/1E6,
-                                              receiver.gain_db)
+    print("Started %s at %.3f Msps" % (hw_args, receiver.samp_rate/1E6))
+    print("RX at %.3f MHz with %d dB gain" % (receiver.center_freq/1E6,
+                                              receiver.gain_db))
     receiver.set_squelch(-60)
     receiver.set_volume(0)
-    print "%d demods of type %d at %d dB squelch and %d dB volume" % \
-        (num_demod, type_demod, receiver.squelch_db, receiver.volume_db)
+    print("%d demods of type %d at %d dB squelch and %d dB volume" % \
+        (num_demod, type_demod, receiver.squelch_db, receiver.volume_db))
 
     # Create some baseband channels to tune based on 144 MHz center
     channels = np.zeros(num_demod)
@@ -622,9 +620,9 @@ def main():
 
     # Print demodulator info
     for idx, channel in enumerate(channels):
-        print "Tuned demod %d to %.3f MHz" % (idx,
+        print("Tuned demod %d to %.3f MHz" % (idx,
                                               (channel+receiver.center_freq)
-                                              /1E6)
+                                              /1E6))
 
     while 1:
         # No need to go faster than 10 Hz rate of GNU Radio probe
@@ -633,7 +631,7 @@ def main():
 
         # Grab the FFT data and print max value
         spectrum = receiver.probe_signal_vf.level()
-        print "Max spectrum of %.3f" % (np.max(spectrum))
+        print("Max spectrum of %.3f" % (np.max(spectrum)))
 
     # Stop the receiver
     receiver.stop()
